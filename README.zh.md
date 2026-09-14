@@ -91,7 +91,7 @@ dsh plugin --profile web add dsh-change-review
 
 - **追踪范围**：本进程内所有会话的 `write`/`edit` 工具调用；按会话隔离，子代理改动沿 owner 链聚合到根父会话
 - **实时性**：Host 记录后经 SSE（`/diff-review/events`）推送，客户端只处理当前会话事件
-- **持久性**：颜色持久化（localStorage `dsh.diff-review.colors`）；审查记录**持久化到磁盘**（写操作后防抖自动保存，退出时同步落盘，文件位于 `~/.dsh/profiles/web/diff-review-state.json`），重启 dsh web 后自动恢复；删除该文件即清空历史记录
+- **持久性**：颜色持久化（localStorage `dsh.diff-review.colors`）；审查记录**持久化到磁盘**（写操作后防抖自动保存，退出时同步落盘，每会话一个文件，位于 `$DSH_HOME/diff-review/<sessionId>.json`（未设 `DSH_HOME` 时回退 `~/.dsh/diff-review/<sessionId>.json`），UI 偏好存 `$DSH_HOME/diff-review/ui/`，**同一 harness 下所有 profile 共享一份**），重启 dsh 后自动恢复；删除该目录即清空历史记录
 - **容量保护**：单文件最多 100 次操作；单次内容截断 120KB；diff 单侧最多 1500 行；单独撤回时的三路合并限制单侧最多 2000 行
 - **撤回原理**：记录每项修改的**完整前后内容快照**（来自 write/edit 工具返回值）。撤回最后一项 = 精确还原快照；撤回中间项 = 三路行合并（保留其后修改、撤销该项），重叠即拒绝并提示；撤回成功后该修改及其后的修改从待审列表移除
 - **升级说明**：升级前（未记录内容快照）产生的修改记录无法撤回（不显示撤回按钮）；Host 端改动需**重启 dsh web** 生效，浏览器端改动刷新页面即可
